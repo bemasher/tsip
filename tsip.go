@@ -10,8 +10,6 @@ const (
 	ETX = 0x03
 )
 
-type PacketID byte
-
 // Represents a TSIP packet.
 type Packet struct {
 	ID      byte
