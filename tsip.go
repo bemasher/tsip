@@ -1,3 +1,20 @@
+/*
+The TSIP protocol is made up of command and report packets.
+
+Packets are structured as follows:
+
+<DLE> <id> <data string bytes> <DLE> <ETX>
+
+<DLE> is the byte 0x10
+<ETX> is the byte 0x03
+<id> is a packet identifier byte which can have any value excepting <ETX> and <DLE>.
+
+The data string may consist of any combination of bytes, <DLE> bytes are
+"escaped" with an extra <DLE> byte. Packets are terminated by an <ETX> byte
+prefixed with an odd number of <DLE> bytes.
+
+Multi-byte numeric values follow ANSI/IEEE standards. Floating point values follow IEEE 754.
+*/
 package tsip
 
 import (
