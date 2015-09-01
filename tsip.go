@@ -12,12 +12,14 @@ const (
 
 type PacketID byte
 
+// Represents a TSIP packet.
 type Packet struct {
 	ID      byte
-	SubCode byte
+	SubCode byte // This field is for convenience only, it is ignored in the Write method.
 	Data    []byte
 }
 
+// Return a string representation of the packet, trimming the Data field to 24 bytes.
 func (p Packet) String() string {
 	if len(p.Data) > 24 {
 		return fmt.Sprintf("{ID:0x%02X SubCode:0x%02X Data:%02X...}", p.ID, p.SubCode, p.Data[:24])
@@ -25,6 +27,9 @@ func (p Packet) String() string {
 	return fmt.Sprintf("{ID:0x%02X SubCode:0x%02X Data:%02X}", p.ID, p.SubCode, p.Data)
 }
 
+// Read a packet from r, discarding data until a valid packet is read. No
+// length checking is done, so be careful to only use this with a trusted data
+// source.
 func (p *Packet) Read(r io.Reader) (err error) {
 	b := make([]byte, 1)
 
@@ -82,7 +87,12 @@ loop:
 	return
 }
 
+// Write the packet to w, escaping any DLE's encountered in Data.
 func (p *Packet) Write(w io.Writer) error {
+	if p.ID == DLE || p.ID == ETX {
+		return fmt.Errorf("invalid id: %02X", p.ID)
+	}
+
 	if _, err := w.Write([]byte{DLE, p.ID}); err != nil {
 		return err
 	}
